@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"os"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -74,16 +76,20 @@ func result(done chan bool) {
 
 func main() {
 	startTime := time.Now()
-	noOfJobs := 100
+
+	noOfJobs, err := strconv.Atoi(os.Getenv("NUMBER_OF_JOBS"))
+	if err != nil {
+		panic(fmt.Sprintf("invalid NUMBER_OF_JOBS. error %s", err))
+	}
+
+	noOfWorkers, err := strconv.Atoi(os.Getenv("NUMBER_OF_WORKERS"))
+	if err != nil {
+		panic(fmt.Sprintf("invalid NUMBER_OF_WORKERS. error %s", err))
+	}
 
 	go allocate(noOfJobs)
-
 	done := make(chan bool)
-
 	go result(done)
-
-	noOfWorkers := 10
-
 	createWorkerPool(noOfWorkers)
 
 	<-done
